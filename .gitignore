@@ -1,9 +1,13 @@
 # Binaries for programs and plugins
+case_watcher
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+
+#IDE settings
+.idea
 
 # Test binary, built with `go test -c`
 *.test
@@ -13,3 +17,10 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Config file
+.case_watcher.yaml
+
+# log
+watcher.log
+
