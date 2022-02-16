@@ -2,9 +2,8 @@ package search
 
 import (
 	"context"
-	"log"
-
 	"github.com/jwmatthews/case_watcher/pkg/api"
+	"log"
 )
 
 // 	Search will run a keyword search to find relevant cases

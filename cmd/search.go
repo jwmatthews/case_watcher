@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"github.com/jwmatthews/case_watcher/pkg/search"
+	"github.com/jwmatthews/case_watcher/pkg/spreadsheet"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
 )
 
 // searchCmd represents the search command
@@ -21,7 +23,19 @@ var searchCmd = &cobra.Command{
 		var password = viper.GetString("password")
 		var searchQuery = viper.GetString("query")
 		var expression = viper.GetString("expression")
-		search.Search(url, username, password, searchQuery, expression)
+		var spreadsheetId = viper.GetString("spreadsheet")
+		var email = viper.GetString("client_email")
+		var privkey = viper.GetString("private_key")
+		var privkeyId = viper.GetString("private_key_id")
+
+		data, err := search.Search(url, username, password, searchQuery, expression)
+		if err != nil {
+			log.Fatalf("Error:  Failed to search for cases, error: %v\n", err)
+		}
+		err = spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, searchQuery, data)
+		if err != nil {
+			log.Fatalf("Error:  Unable to update spreadsheet, error: %v\n", err)
+		}
 	},
 }
 
