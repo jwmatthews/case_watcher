@@ -23,9 +23,49 @@ type ResponseCasesQueryBody struct {
 	Cases    []Case `json:"docs"`
 }
 
-// toCellValues() returns an array we can use to update a spreadsheet
-func (r ResponseCasesQueryBody) toCellValues() string {
-	return ""
+// ToCellValues returns an array we can use to update a spreadsheet
+func (r ResponseCasesQueryBody) ToCellValues() [][]interface{} {
+	values := make([][]interface{}, len(r.Cases)+1)
+	values[0] = CaseCellHeaderValues()
+	startingIndex := 1
+	for index, c := range r.Cases {
+		values[startingIndex+index] = c.ToCellValues()
+	}
+	return values
+}
+
+func (r ResponseCasesQueryBody) ToCaseReport() CaseReport {
+	cr := CaseReport{}
+	for _, c := range r.Cases {
+		if c.Status == "Closed" {
+			cr.ClosedCases = append(cr.ClosedCases, c)
+		} else {
+			cr.OpenCases = append(cr.OpenCases, c)
+		}
+	}
+	return cr
+}
+
+type CaseReport struct {
+	OpenCases   []Case
+	ClosedCases []Case
+}
+
+func (cr CaseReport) ToCellValues() ([][]interface{}, [][]interface{}) {
+	openCaseValues := make([][]interface{}, len(cr.OpenCases)+1)
+	openCaseValues[0] = CaseCellHeaderValues()
+	startingIndex := 1
+	for index, c := range cr.OpenCases {
+		openCaseValues[startingIndex+index] = c.ToCellValues()
+	}
+
+	closedCaseValues := make([][]interface{}, len(cr.ClosedCases)+1)
+	closedCaseValues[0] = CaseCellHeaderValues()
+	startingIndex = 1
+	for index, c := range cr.ClosedCases {
+		closedCaseValues[startingIndex+index] = c.ToCellValues()
+	}
+	return openCaseValues, closedCaseValues
 }
 
 type Case struct {
@@ -66,4 +106,30 @@ func (c Case) String() string {
 		c.CreatedByName,
 		c.ContactName,
 		c.Uri)
+}
+
+func CaseCellHeaderValues() []interface{} {
+	return []interface{}{"Uri",
+		"Severity",
+		"Id",
+		"Status",
+		"Summary",
+		"CreatedByName",
+		"CreatedDate",
+		"LastModifiedData",
+	}
+}
+func (c Case) ToCellValues() []interface{} {
+	values := make([]interface{}, 0)
+	values = append(values,
+		fmt.Sprintf("=hyperlink(\"%s\")", c.Uri),
+		c.Severity,
+		c.Id,
+		c.Status,
+		c.Summary,
+		c.CreatedByName,
+		c.CreatedDate.String(),
+		c.LastModifiedDate.String(),
+	)
+	return values
 }

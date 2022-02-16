@@ -30,14 +30,14 @@ func CreateIfSheetDoesNotExist(srv *sheets.Service, spreadsheetId, sheetName str
 	}
 }
 
-func Update(spreadsheetId, email, private_key, private_key_id, originalSearchQuery string, data *api.ResponseCasesQueryBody) error {
+func Update(spreadsheetId, email, privateKey, privateKeyId string, caseReport *api.CaseReport) error {
 
 	// See: https://stackoverflow.com/questions/58874474/unable-to-access-google-spreadsheets-with-a-service-account-credentials-using-go
 	// Create a JWT configurations object for the Google service account
 	conf := &jwt.Config{
 		Email:        email,
-		PrivateKey:   []byte(private_key),
-		PrivateKeyID: private_key_id,
+		PrivateKey:   []byte(privateKey),
+		PrivateKeyID: privateKeyId,
 		TokenURL:     "https://oauth2.googleapis.com/token",
 		Scopes: []string{
 			"https://www.googleapis.com/auth/spreadsheets",
@@ -53,13 +53,30 @@ func Update(spreadsheetId, email, private_key, private_key_id, originalSearchQue
 	}
 
 	currentDate := time.Now().Format("2006-01-02")
-	sheetName := fmt.Sprintf("OpenCases - %s", currentDate)
-	CreateIfSheetDoesNotExist(srv, spreadsheetId, sheetName)
+	openCaseSheetName := fmt.Sprintf("OpenCases - %s", currentDate)
+	CreateIfSheetDoesNotExist(srv, spreadsheetId, openCaseSheetName)
+	openCaseSheetRange := fmt.Sprintf("%s!A1:Z9999", openCaseSheetName)
 
-	sheetRange := fmt.Sprintf("%s!A1:Z9999", sheetName)
-	log.Printf("Will update %s next\n", sheetRange)
+	closedCaseSheetName := "Closed Cases"
+	CreateIfSheetDoesNotExist(srv, spreadsheetId, closedCaseSheetName)
+	closedCaseSheetRange := fmt.Sprintf("%s!A1:Z9999", closedCaseSheetName)
 
-	values := [][]interface{}{{"sample_A1", "sample_B1"}, {"sample_A2", "sample_B2"}, {"sample_A3", "sample_A3"}}
+	openCaseValues, closedCaseValues := caseReport.ToCellValues()
+	err = UpdateSheet(srv, spreadsheetId, openCaseSheetRange, openCaseValues)
+	if err != nil {
+		log.Printf("Error:  unable to write %s", openCaseSheetRange)
+		return err
+	}
+
+	err = UpdateSheet(srv, spreadsheetId, closedCaseSheetRange, closedCaseValues)
+	if err != nil {
+		log.Printf("Error:  unable to write %s", openCaseSheetRange)
+		return err
+	}
+	return nil
+}
+
+func UpdateSheet(srv *sheets.Service, spreadsheetId, sheetRange string, values [][]interface{}) error {
 	rb := &sheets.BatchUpdateValuesRequest{
 		ValueInputOption: "USER_ENTERED",
 	}
@@ -68,15 +85,15 @@ func Update(spreadsheetId, email, private_key, private_key_id, originalSearchQue
 		Values: values,
 	})
 
-	_, err = srv.Spreadsheets.Values.Clear(spreadsheetId, sheetRange, &sheets.ClearValuesRequest{}).Context(context.Background()).Do()
+	_, err := srv.Spreadsheets.Values.Clear(spreadsheetId, sheetRange, &sheets.ClearValuesRequest{}).Context(context.Background()).Do()
 	if err != nil {
-		log.Fatalf("Error, failed to clear spreadsheet: %s %s, received error: %s\n", spreadsheetId, sheetRange, err)
+		log.Printf("Error, failed to clear spreadsheet: %s %s, received error: %s\n", spreadsheetId, sheetRange, err)
+		return err
 	}
-
 	_, err = srv.Spreadsheets.Values.BatchUpdate(spreadsheetId, rb).Context(context.Background()).Do()
 	if err != nil {
-		log.Fatalf("Error, failed to write to spreadsheet: %s %s, received error: %s\n", spreadsheetId, sheetRange, err)
+		log.Printf("Error, failed to write to spreadsheet: %s %s, received error: %s\n", spreadsheetId, sheetRange, err)
+		return err
 	}
-
 	return nil
 }

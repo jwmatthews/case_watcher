@@ -17,6 +17,7 @@ var searchCmd = &cobra.Command{
 	of cases, i.e. cases that are not directly related to our team 
 	but matched from the keyword search.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		VerifyParamsOrDie()
 		// Parse configuration options
 		var url = viper.GetString("url")
 		var username = viper.GetString("username")
@@ -32,7 +33,9 @@ var searchCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error:  Failed to search for cases, error: %v\n", err)
 		}
-		err = spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, searchQuery, data)
+
+		cr := data.ToCaseReport()
+		err = spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, &cr)
 		if err != nil {
 			log.Fatalf("Error:  Unable to update spreadsheet, error: %v\n", err)
 		}

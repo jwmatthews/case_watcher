@@ -14,15 +14,15 @@ var spreadsheetCmd = &cobra.Command{
 	Short: "Will update a google spreadsheet",
 	Long:  `Updates a google spreadsheet with cached data`,
 	Run: func(cmd *cobra.Command, args []string) {
+		VerifyParamsOrDie()
 		// Parse configuration options
-		var searchQuery = viper.GetString("query")
 		var spreadsheetId = viper.GetString("spreadsheet")
 		var email = viper.GetString("client_email")
 		var privkey = viper.GetString("private_key")
 		var privkeyId = viper.GetString("private_key_id")
 
-		data := api.ResponseCasesQueryBody{}
-		err := spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, searchQuery, &data)
+		data := api.CaseReport{}
+		err := spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, &data)
 		if err != nil {
 			log.Fatalf("Error:  Unable to update spreadsheet, error: %v\n", err)
 		}
