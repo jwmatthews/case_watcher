@@ -70,7 +70,7 @@ func Update(spreadsheetId, email, privateKey, privateKeyId string, caseReport *a
 
 	err = UpdateSheet(srv, spreadsheetId, closedCaseSheetRange, closedCaseValues)
 	if err != nil {
-		log.Printf("Error:  unable to write %s", openCaseSheetRange)
+		log.Printf("Error:  unable to write %s", closedCaseSheetRange)
 		return err
 	}
 	return nil

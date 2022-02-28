@@ -21,6 +21,9 @@ var spreadsheetCmd = &cobra.Command{
 		var privkey = viper.GetString("private_key")
 		var privkeyId = viper.GetString("private_key_id")
 
+		// At the moment this command is to help test the spreadsheet integration
+		// We create an empty report for now.
+		// In future I expect this will read cached data and update the spreadsheet from it
 		data := api.CaseReport{}
 		err := spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, &data)
 		if err != nil {

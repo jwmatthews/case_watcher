@@ -24,7 +24,7 @@ func Search(url, username, password, searchQuery, expression string) (*api.Respo
 	if err != nil {
 		log.Fatalf("Error from client.GetCases():  err = '%v'", err)
 	}
-	log.Printf("client.GetCases() returnedm: \n%v\n", resp)
+	log.Printf("client.GetCases() returned: \n%v\n", resp)
 	log.Printf("Response:  Start = '%d', NumFound = '%d', len(Cases) = '%d'", resp.Start, resp.NumFound, len(resp.Cases))
 
 	for index, theCase := range resp.Cases {

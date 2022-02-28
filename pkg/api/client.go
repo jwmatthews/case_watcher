@@ -85,20 +85,6 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		log.Printf("Warning: unable to unmarshall 'response', received error: %v\n", err)
 		return err
 	}
-	//json.NewDecoder(res.Body).Decode(&)
-
-	//var users []Users
-	//err := json.Unmarshal(body, &users)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	/*fullResponse := successResponse{
-		Data: v,
-	}
-	if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
-		return err
-	}
-	*/
 	return nil
 }
 
