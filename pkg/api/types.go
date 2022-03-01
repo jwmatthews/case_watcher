@@ -74,7 +74,7 @@ type Case struct {
 	CreatedByName        string    `json:"case_createdByName"`
 	ContactName          string    `json:"case_contactName"`
 	Version              string    `json:"case_version"`
-	Product              []string  `json:"case_product"`
+	Products             []string  `json:"case_product"`
 	Number               string    `json:"case_number"`
 	LastPublicUpdateBy   string    `json:"case_last_public_update_by"`
 	Severity             string    `json:"case_severity"`

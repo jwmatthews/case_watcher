@@ -24,3 +24,6 @@ case_watcher
 # log
 watcher.log
 
+# DB
+sqlite_case_watcher.db
+
