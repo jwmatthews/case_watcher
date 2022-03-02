@@ -26,4 +26,4 @@ watcher.log
 
 # DB
 sqlite_case_watcher.db
-cache/unit_tests.db
+pkg/cache/unit_tests.db
