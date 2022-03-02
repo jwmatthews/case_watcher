@@ -8,18 +8,18 @@ import (
 )
 
 type Cache struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 func Init(dbName string) (Cache, error) {
 	var err error
 	c := Cache{}
-	c.db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	c.DB, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		log.Printf("Error opening db:  %s\n", err)
 		return c, err
 	}
-	err = c.db.AutoMigrate(&Case{}, &Product{})
+	err = c.DB.AutoMigrate(&Case{}, &Product{})
 	if err != nil {
 		log.Printf("Error migrating schema: %s\n", err)
 		return c, err
@@ -33,10 +33,13 @@ func (c Cache) StoreCases(cases []api.Case) error {
 
 	for _, tmpCase := range myCases {
 		log.Printf("Attempting to save: %v\n", tmpCase)
-		if c.db.Model(&tmpCase).Where("id = ?", tmpCase.Id).Updates(&tmpCase).RowsAffected == 0 {
-			c.db.Create(&tmpCase)
+		if c.DB.Model(&tmpCase).Where("id = ?", tmpCase.Id).Updates(&tmpCase).RowsAffected == 0 {
+			c.DB.Create(&tmpCase)
 			log.Printf("Saved new case: %s\n", tmpCase.Id)
 		}
+		//for p := tmpCase.Products {
+		//	c.db.Model(&p).
+		//}
 	}
 	return nil
 }
@@ -59,10 +62,11 @@ func (c Cache) ConvertToDBCase(ac api.Case) Case {
 	myCase.ContactName = ac.ContactName
 	myCase.Version = ac.Version
 	for _, p := range ac.Products {
-		prod := Product{}
+		prod := Product{Name: p}
+		myCase.Products = append(myCase.Products, prod)
 		// Look up an existing product of this name or create a new one
-		c.db.Where("name = ?", p).FirstOrCreate(&prod, Product{Name: p})
-		log.Printf("ConvertToDBCase:: Product = %v", prod)
+		//c.db.Where("name = ?", p).FirstOrCreate(&prod, Product{Name: p})
+		//log.Printf("ConvertToDBCase:: Product = %v", prod)
 	}
 	return myCase
 }
