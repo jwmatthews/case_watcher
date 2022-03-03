@@ -87,11 +87,11 @@ func (c Cache) ConvertToDBCase(ac api.Case) Case {
 	myCase.ContactName = ac.ContactName
 	myCase.Version = ac.Version
 	for _, p := range ac.Products {
-		prod := Product{Name: p}
+		prod := Product{}
+		if c.DB.Where(&Product{Name: p, CaseId: ac.Id}).First(&prod).RowsAffected == 0 {
+			prod.Name = p
+		}
 		myCase.Products = append(myCase.Products, prod)
-		// Look up an existing product of this name or create a new one
-		//c.db.Where("name = ?", p).FirstOrCreate(&prod, Product{Name: p})
-		//log.Printf("ConvertToDBCase:: Product = %v", prod)
 	}
 	return myCase
 }

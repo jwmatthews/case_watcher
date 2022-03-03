@@ -53,6 +53,45 @@ func TestStoreCases(t *testing.T) {
 
 }
 
+// TestStoreCasesCalledMultipleTimes will ensure when we update a Case
+// with Products we do not create duplicate Product entries
+func TestStoreCasesCalledMultipleTimes(t *testing.T) {
+	t.Log("Running TestStoreCases")
+	myCases := make([]api.Case, 0)
+	myCase := getSampleCase()
+	myCases = append(myCases, myCase)
+
+	// TODO: giNote DB is currently shared between tests, may want to make it cleanup on each test
+	cases := make([]Case, 0)
+	result := myCache.DB.Where(&Case{Id: "myid1"}).Find(&cases)
+	assert.Equal(t, int64(1), result.RowsAffected)
+	assert.Equal(t, 1, len(cases))
+
+	// Call #1
+	err := myCache.StoreCases(myCases)
+	require.NoError(t, err)
+	// Call #2
+	err = myCache.StoreCases(myCases)
+	require.NoError(t, err)
+	// Call #3
+	err = myCache.StoreCases(myCases)
+	require.NoError(t, err)
+
+	cases = make([]Case, 0)
+	result = myCache.DB.Where(&Case{Id: "myid1"}).Find(&cases)
+	assert.Equal(t, int64(1), result.RowsAffected)
+	assert.Equal(t, 1, len(cases))
+
+	case2 := Case{}
+	err = myCache.DB.Preload("Products").Where(&Case{Id: "myid1"}).First(&case2).Error
+	require.NoError(t, err)
+	assert.Equal(t, 3, len(case2.Products), "Number of products should equal to test data created")
+
+	products := make([]Product, 0)
+	result = myCache.DB.Where(&Product{CaseId: "myid1"}).Find(&products)
+	assert.Equal(t, int64(3), result.RowsAffected)
+}
+
 func CleanUpDB(dbName string) error {
 	_, err := os.Stat(dbName)
 	if err != nil {
