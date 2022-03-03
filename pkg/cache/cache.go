@@ -4,7 +4,10 @@ import (
 	"github.com/jwmatthews/case_watcher/pkg/api"
 	"gorm.io/driver/sqlite" // Sqlite driver based on GGO
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
+	"os"
+	"time"
 )
 
 type Cache struct {
@@ -14,7 +17,20 @@ type Cache struct {
 func Init(dbName string) (Cache, error) {
 	var err error
 	c := Cache{}
-	c.DB, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,       // Disable color
+		},
+	)
+
+	c.DB, err = gorm.Open(sqlite.Open(dbName),
+		&gorm.Config{
+			Logger: newLogger,
+		})
 	if err != nil {
 		log.Printf("Error opening db:  %s\n", err)
 		return c, err
@@ -32,15 +48,24 @@ func (c Cache) StoreCases(cases []api.Case) error {
 	myCases := c.ConvertToDBCases(cases)
 
 	for _, tmpCase := range myCases {
-		log.Printf("Attempting to save: %v\n", tmpCase)
-		if c.DB.Model(&tmpCase).Where("id = ?", tmpCase.Id).Updates(&tmpCase).RowsAffected == 0 {
-			c.DB.Create(&tmpCase)
-			log.Printf("Saved new case: %s\n", tmpCase.Id)
+		err := c.StoreCase(tmpCase)
+		if err != nil {
+			log.Printf("Error storing case '%s':  %s", tmpCase.Id, err)
+			return err
 		}
-		//for p := tmpCase.Products {
-		//	c.db.Model(&p).
-		//}
 	}
+	return nil
+}
+
+func (c Cache) StoreCase(myCase Case) error {
+	log.Printf("Attempting to save: %v\n", myCase)
+	if c.DB.Model(&myCase).Where("id = ?", myCase.Id).Updates(&myCase).RowsAffected == 0 {
+		c.DB.Create(&myCase)
+		log.Printf("Saved new case: %s\n", myCase.Id)
+	}
+	//for p := tmpCase.Products {
+	//	c.db.Model(&p).
+	//}
 	return nil
 }
 

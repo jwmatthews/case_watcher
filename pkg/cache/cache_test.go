@@ -9,6 +9,12 @@ import (
 	"testing"
 )
 
+// Desired test
+// - Create a Case with several Products and ensure we can query and get correct Products
+// - Update a Case 3+ times, ensure no extra Products are created
+// - Update a Case and remove a Product
+// - Update a Case and add a Product
+// - Delete a Case and see the associated Product mappings are deletedgi
 const (
 	dbName = "unit_tests.db"
 )
@@ -41,10 +47,24 @@ func TestStoreCases(t *testing.T) {
 	assert.Equal(t, product.CaseId, "myid1", "CaseId should match what was queried")
 
 	case2 := Case{}
-	err = myCache.DB.Where(&Case{Id: "myid1"}).First(&case2).Error
+	err = myCache.DB.Preload("Products").Where(&Case{Id: "myid1"}).First(&case2).Error
 	require.NoError(t, err)
-	assert.Equal(t, len(case2.Products), 3, "Number of products should equal to test data created")
+	assert.Equal(t, 3, len(case2.Products), "Number of products should equal to test data created")
 
+}
+
+func CleanUpDB(dbName string) error {
+	_, err := os.Stat(dbName)
+	if err != nil {
+		fmt.Printf("Error looking up test db file, %s: %s\n", dbName, err)
+		return err
+	}
+	err = os.Remove(dbName)
+	if err != nil {
+		fmt.Printf("Error removing test db file, %s: %s\n", dbName, err)
+		return err
+	}
+	return nil
 }
 
 func TestMain(m *testing.M) {
@@ -54,5 +74,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		fmt.Printf("Failed to initiative database: %s\n", err)
 	}
-	os.Exit(m.Run())
+	retCode := m.Run()
+	_ = CleanUpDB(dbName)
+	os.Exit(retCode)
 }
