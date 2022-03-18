@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const DBName = "sqlite_case_watcher.db"
+
 var cfgFile string
 var url string
 var username string

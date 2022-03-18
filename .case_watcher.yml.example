@@ -9,4 +9,9 @@ spreadsheet: "REPLACE"
 private_key_id: "REPLACE"
 private_key: "-----BEGIN PRIVATE KEY-----\nREPLACE\n-----END PRIVATE KEY-----\n"
 client_email: "replace@replace.iam.gserviceaccount.com"
-
+# Email Report
+ses_region: "us-east-1"
+ses_sender: "email_addr_verified_with_amazon_ses@example.com"
+report_email_recipients:
+- user1@example.com
+- user2@example.com

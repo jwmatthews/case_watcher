@@ -33,7 +33,7 @@ var searchCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error:  Failed to search for cases, error: %v\n", err)
 		}
-		c, err := cache.Init("sqlite_case_watcher.db")
+		c, err := cache.Init(DBName)
 		if err != nil {
 			log.Fatalf("Error:  Unable to initialize cache: %s", err)
 		}
