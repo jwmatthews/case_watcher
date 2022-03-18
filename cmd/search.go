@@ -41,6 +41,11 @@ var searchCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Error updating cases in cache: %s\n", err)
 		}
+		accountIDs := c.GetMissingAccountIDs()
+		if err != nil {
+			log.Fatalf("Error processing updates to cache: %s\n", err)
+		}
+		log.Printf("Found missing account IDs: %s", accountIDs)
 		/*
 			cr := data.ToCaseReport()
 			err = spreadsheet.Update(spreadsheetId, email, privkey, privkeyId, &cr)

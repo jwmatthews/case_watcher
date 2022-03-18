@@ -71,6 +71,7 @@ func (cr CaseReport) ToCellValues() ([][]interface{}, [][]interface{}) {
 type Case struct {
 	Id                   string    `json:"id"`
 	Uri                  string    `json:"uri"`
+	CaseNumber           string    `json:"caseNumber"`
 	CreatedByName        string    `json:"case_createdByName"`
 	ContactName          string    `json:"case_contactName"`
 	Version              string    `json:"case_version"`
@@ -95,9 +96,10 @@ func (c Case) String() string {
 		"Case[%s] %s, Created %s\n"+
 			"\tSeverity: %s, Status: %s\n"+
 			"\tLastPublicUpdateDate: %s\n"+
-			"\tCreatedByName; %s, ContactName: %s"+
-			"\tURI: %s",
-		c.Id,
+			"\tCreatedByName; %s, ContactName: %s\n"+
+			"\tURI: %s\n"+
+			"\tId: %s\n",
+		c.CaseNumber,
 		c.Summary,
 		c.CreatedDate,
 		c.Severity,
@@ -105,7 +107,8 @@ func (c Case) String() string {
 		c.LastPublicUpdateDate,
 		c.CreatedByName,
 		c.ContactName,
-		c.Uri)
+		c.Uri,
+		c.Id)
 }
 
 func CaseCellHeaderValues() []interface{} {
@@ -132,4 +135,17 @@ func (c Case) ToCellValues() []interface{} {
 		c.LastModifiedDate.String(),
 	)
 	return values
+}
+
+type Account struct {
+	AccountNumber  string `json:"accountNumber"`
+	GSCSMSegment   string `json:"gscsmSegment"`
+	Name           string `json:"name"`
+	CSMUserID      string `json:"csmUserId"`
+	CSMUserName    string `json:"csmUserName"`
+	CSMUserSSOName string `json:"csmUserSSOName"`
+	Strategic      bool   `json:"strategic"`
+	HasEnhancedSLA bool   `json:"hasEnhancedSLA"`
+	HasSRM         bool   `json:"hasSRM"`
+	HasTAM         bool   `json:"hasTAM"`
 }

@@ -32,3 +32,16 @@ type Case struct {
 	CustomerEscalation   bool
 	Status               string
 }
+
+type Account struct {
+	AccountNumber  string `gorm:"primaryKey"`
+	GSCSMSegment   string
+	Name           string
+	CSMUserID      string
+	CSMUserName    string
+	CSMUserSSOName string
+	Strategic      bool
+	HasEnhancedSLA bool
+	HasSRM         bool
+	HasTAM         bool
+}

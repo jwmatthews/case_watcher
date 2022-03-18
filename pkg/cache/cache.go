@@ -35,7 +35,7 @@ func Init(dbName string) (Cache, error) {
 		log.Printf("Error opening db:  %s\n", err)
 		return c, err
 	}
-	err = c.DB.AutoMigrate(&Case{}, &Product{})
+	err = c.DB.AutoMigrate(&Case{}, &Product{}, &Account{})
 	if err != nil {
 		log.Printf("Error migrating schema: %s\n", err)
 		return c, err
@@ -63,9 +63,6 @@ func (c Cache) StoreCase(myCase Case) error {
 		c.DB.Create(&myCase)
 		log.Printf("Saved new case: %s\n", myCase.Id)
 	}
-	//for p := tmpCase.Products {
-	//	c.db.Model(&p).
-	//}
 	return nil
 }
 
@@ -94,4 +91,21 @@ func (c Cache) ConvertToDBCase(ac api.Case) Case {
 		myCase.Products = append(myCase.Products, prod)
 	}
 	return myCase
+}
+
+// GetMissingAccountIDs will return a slice of account ids we lack details on
+func (c Cache) GetMissingAccountIDs() []string {
+	// Find all Account IDs from all Cases saved.
+	accountNums := make([]string, 0)
+	result := make([]string, 0)
+	c.DB.Raw("SELECT account_number FROM cases WHERE 'account_number' is NOT NULL").Scan(&accountNums)
+	for i := range accountNums {
+		if accountNums[i] != "" {
+			result = append(result, accountNums[i])
+		}
+	}
+	return result
+	//c.DB.Table("cases").Select("account_number").Scan(&accountNums)
+	// Find all Account IDs which do not have an entry in the Database
+
 }
