@@ -107,5 +107,40 @@ func (c Cache) GetMissingAccountIDs() []string {
 	return result
 	//c.DB.Table("cases").Select("account_number").Scan(&accountNums)
 	// Find all Account IDs which do not have an entry in the Database
+}
 
+func (c Cache) GetAllCases() ([]Case, error) {
+	cases := make([]Case, 0)
+	err := c.DB.Where(&Case{}).Find(&cases).Error
+	if err != nil {
+		return []Case{}, err
+	}
+	return cases, nil
+}
+
+func (c Cache) GetOpenCases() ([]Case, error) {
+	cases := make([]Case, 0)
+	err := c.DB.Where("status != 'Closed'").Find(&cases).Error
+	if err != nil {
+		return []Case{}, err
+	}
+	return cases, nil
+}
+
+func (c Cache) GetClosedCases() ([]Case, error) {
+	cases := make([]Case, 0)
+	err := c.DB.Where("status == 'Closed'").Find(&cases).Error
+	if err != nil {
+		return []Case{}, err
+	}
+	return cases, nil
+}
+
+func (c Cache) GetCasesActiveFrom(since time.Time) ([]Case, error) {
+	cases := make([]Case, 0)
+	err := c.DB.Where("last_modified_date >= ?", since).Find(&cases).Error
+	if err != nil {
+		return []Case{}, err
+	}
+	return cases, nil
 }

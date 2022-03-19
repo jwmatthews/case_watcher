@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/jwmatthews/case_watcher/pkg/cache"
 	"github.com/jwmatthews/case_watcher/pkg/email"
+	"github.com/jwmatthews/case_watcher/pkg/report"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -15,15 +16,17 @@ var emailCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		VerifyParamsOrDie()
 		// Parse configuration options
+		var spreadsheetId = viper.GetString("spreadsheet")
 		var sesRegion = viper.GetString("ses_region")
 		var sesSender = viper.GetString("ses_sender")
 		var reportEmailRecipients = viper.GetStringSlice("report_email_recipients")
-		g
-		_, err := cache.Init(DBName)
+
+		c, err := cache.Init(DBName)
 		if err != nil {
 			log.Fatalf("Error:  Unable to initialize cache: %s", err)
 		}
-		err = email.Send(sesSender, sesRegion, reportEmailRecipients)
+		report := report.GetReport(&c, spreadsheetId)
+		err = email.Send(report, sesSender, sesRegion, reportEmailRecipients)
 		if err != nil {
 			log.Fatalf("Error:  Unable to send report via email: %s", err)
 		}

@@ -2,6 +2,7 @@ package email
 
 import (
 	"fmt"
+	"github.com/jwmatthews/case_watcher/pkg/report"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -20,7 +21,7 @@ const (
 	CharSet = "UTF-8"
 )
 
-func Send(sender string, region string, recipients []string) error {
+func Send(report report.Report, sender string, region string, recipients []string) error {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(region)},
 	)
@@ -43,12 +44,14 @@ func Send(sender string, region string, recipients []string) error {
 			Body: &ses.Body{
 				Html: &ses.Content{
 					Charset: aws.String(CharSet),
-					Data:    aws.String(HtmlBody),
+					//Data:    aws.String(HtmlBody),
+					Data: aws.String(report.ToHTML()),
 				},
 			},
 			Subject: &ses.Content{
 				Charset: aws.String(CharSet),
-				Data:    aws.String(Subject),
+				//Data:    aws.String(Subject),
+				Data: aws.String(report.GetSubjectLine()),
 			},
 		},
 		Source: aws.String(sender),

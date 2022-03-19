@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+	"time"
 )
 
 // Desired test
@@ -102,12 +103,114 @@ func TestGetMissingAccountIDs(t *testing.T) {
 
 	foundAccountIDs := myCache.GetMissingAccountIDs()
 	t.Log("foundAccountIDs = ", foundAccountIDs)
-	assert.Equal(t, len(foundAccountIDs), 2)
+	assert.Equal(t, 2, len(foundAccountIDs))
 	assert.Contains(t, foundAccountIDs, "1")
 	assert.Contains(t, foundAccountIDs, "2")
 
 	// Next is to save an Account, and ensure that the
 	// saved Account is not included with missing account IDs
+}
+
+func TestCache_GetAllCases(t *testing.T) {
+	myCache := InitCache(t, dbName)
+	defer CleanUpDB(dbName)
+	myCase1 := Case{Id: "case1", AccountNumber: "1"}
+	myCase2 := Case{Id: "case2", AccountNumber: "2"}
+	myCase3 := Case{Id: "case3", AccountNumber: "3"}
+	err := myCache.StoreCase(myCase1)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase2)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase3)
+	require.NoError(t, err)
+
+	foundCases, err := myCache.GetAllCases()
+	require.NoError(t, err)
+	t.Log("foundCases = ", foundCases)
+	assert.Equal(t, 3, len(foundCases))
+}
+
+func TestCache_GetOpenCases(t *testing.T) {
+	myCache := InitCache(t, dbName)
+	defer CleanUpDB(dbName)
+	myCase1 := Case{Id: "case1", AccountNumber: "1", Status: "Waiting on Customer"}
+	myCase2 := Case{Id: "case2", AccountNumber: "2", Status: "Unknown"}
+	myCase3 := Case{Id: "case3", AccountNumber: "3", Status: "Closed"}
+	myCase4 := Case{Id: "case4", AccountNumber: "4", Status: "Closed"}
+	myCase5 := Case{Id: "case5", AccountNumber: "5", Status: "Closed"}
+	err := myCache.StoreCase(myCase1)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase2)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase3)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase4)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase5)
+	require.NoError(t, err)
+
+	foundCases, err := myCache.GetOpenCases()
+	require.NoError(t, err)
+	t.Log("foundCases = ", foundCases)
+	assert.Equal(t, 2, len(foundCases))
+}
+
+func TestCache_GetCasesActiveFrom(t *testing.T) {
+	myCache := InitCache(t, dbName)
+	defer CleanUpDB(dbName)
+	myCase1 := Case{Id: "case1", AccountNumber: "1", Status: "Waiting on Customer", LastModifiedDate: time.Now().AddDate(0, 0, -1)}
+	myCase2 := Case{Id: "case2", AccountNumber: "2", Status: "Unknown", LastModifiedDate: time.Now().AddDate(0, 0, -25)}
+	myCase3 := Case{Id: "case3", AccountNumber: "3", Status: "Closed", LastModifiedDate: time.Now().AddDate(0, 0, -3)}
+	myCase4 := Case{Id: "case4", AccountNumber: "4", Status: "Closed", LastModifiedDate: time.Now().AddDate(0, -1, 0)}
+	myCase5 := Case{Id: "case5", AccountNumber: "5", Status: "Closed", LastModifiedDate: time.Now().AddDate(-1, 0, 0)}
+	err := myCache.StoreCase(myCase1)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase2)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase3)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase4)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase5)
+	require.NoError(t, err)
+
+	foundCases, err := myCache.GetCasesActiveFrom(time.Now().AddDate(0, 0, -7))
+	require.NoError(t, err)
+	t.Log("foundCases = ", foundCases)
+	assert.Equal(t, 2, len(foundCases))
+	for _, c := range foundCases {
+		// We expect only 'case1' and 'case3' have been active in the past week
+		assert.Contains(t, []string{"case1", "case3"}, c.Id)
+	}
+}
+
+func TestCache_GetClosedCases(t *testing.T) {
+	myCache := InitCache(t, dbName)
+	defer CleanUpDB(dbName)
+	myCase1 := Case{Id: "case1", AccountNumber: "1", Status: "Waiting on Customer"}
+	myCase2 := Case{Id: "case2", AccountNumber: "2", Status: "Unknown"}
+	myCase3 := Case{Id: "case3", AccountNumber: "3", Status: "Closed"}
+	myCase4 := Case{Id: "case4", AccountNumber: "4", Status: "Closed"}
+	myCase5 := Case{Id: "case5", AccountNumber: "5", Status: "Closed"}
+	err := myCache.StoreCase(myCase1)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase2)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase3)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase4)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase5)
+	require.NoError(t, err)
+
+	foundCases, err := myCache.GetClosedCases()
+	require.NoError(t, err)
+	t.Log("foundCases = ", foundCases)
+	assert.Equal(t, 3, len(foundCases))
+	for _, c := range foundCases {
+		// We expect only 'case3', 'case4', 'case5' to be Closed
+		assert.Contains(t, []string{"case3", "case4", "case5"}, c.Id)
+	}
 }
 
 func CleanUpDB(dbName string) error {
