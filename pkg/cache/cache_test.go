@@ -213,6 +213,37 @@ func TestCache_GetClosedCases(t *testing.T) {
 	}
 }
 
+func TestCache_GetUniqueCaseStatusValues(t *testing.T) {
+	myCache := InitCache(t, dbName)
+	defer CleanUpDB(dbName)
+	myCase1 := Case{Id: "case1", AccountNumber: "1", Status: "Waiting on Customer"}
+	myCase2 := Case{Id: "case2", AccountNumber: "2", Status: "Unknown"}
+	myCase3 := Case{Id: "case3", AccountNumber: "3", Status: "Foo"}
+	myCase4 := Case{Id: "case4", AccountNumber: "4", Status: "Foo"}
+	myCase5 := Case{Id: "case5", AccountNumber: "5", Status: "Closed"}
+	myCase6 := Case{Id: "case6", AccountNumber: "6", Status: "Closed"}
+	err := myCache.StoreCase(myCase1)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase2)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase3)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase4)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase5)
+	require.NoError(t, err)
+	err = myCache.StoreCase(myCase6)
+	require.NoError(t, err)
+
+	foundValues, err := myCache.GetUniqueCaseStatusValues()
+	require.NoError(t, err)
+	t.Log("foundValues = ", foundValues)
+	assert.Equal(t, 4, len(foundValues))
+	for _, v := range foundValues {
+		assert.Contains(t, []string{"Waiting on Customer", "Foo", "Unknown", "Closed"}, v)
+	}
+}
+
 func CleanUpDB(dbName string) error {
 	_, err := os.Stat(dbName)
 	if err != nil {

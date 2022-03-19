@@ -12,25 +12,26 @@ type Product struct {
 }
 
 type Case struct {
-	Id                   string `gorm:"primary_key"`
-	Uri                  string
-	CreatedByName        string
-	ContactName          string
-	Version              string
-	Products             []Product
-	Number               string
-	LastPublicUpdateBy   string
-	Severity             string
-	Owner                string
-	LastPublicUpdateDate time.Time
-	CreatedDate          time.Time
-	Summary              string
-	LastModifiedDate     time.Time
 	AccountNumber        string
-	Type                 string
-	LastModifiedByName   string
+	CaseNumber           string
+	ContactName          string
+	CreatedByName        string
+	CreatedDate          time.Time
 	CustomerEscalation   bool
+	Id                   string `gorm:"primary_key"`
+	LastModifiedByName   string
+	LastModifiedDate     time.Time
+	LastPublicUpdateBy   string
+	LastPublicUpdateDate time.Time
+	Number               string
+	Owner                string
+	Products             []Product
+	Severity             string
+	Summary              string
 	Status               string
+	Type                 string
+	Uri                  string
+	Version              string
 }
 
 type Account struct {

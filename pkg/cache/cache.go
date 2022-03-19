@@ -20,10 +20,11 @@ func Init(dbName string) (Cache, error) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
+			SlowThreshold: time.Second, // Slow SQL threshold
+			//LogLevel:                  logger.Info, // Log level
+			LogLevel:                  logger.Warn, // Log level
 			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			Colorful:                  false,       // Disable color
+			Colorful:                  true,        // Disable color
 		},
 	)
 
@@ -76,13 +77,28 @@ func (c Cache) ConvertToDBCases(cases []api.Case) []Case {
 	return myCases
 }
 
+// ConvertToDBCase converts from api format to DB
+// Ideally I would have 1 structure type and reuse for both
+// I *think* I need the 2 different formmats to handle some subtle
+// differences with JSON vs Gorm modeling of Products, but I am not 100% certain
+// TODO: See if there is a cleaner way to refactor to a single reused structure definition between incoming API data and DB
+//
 func (c Cache) ConvertToDBCase(ac api.Case) Case {
 	myCase := Case{}
-	myCase.Id = ac.Id
-	myCase.Uri = ac.Uri
-	myCase.CreatedByName = ac.CreatedByName
+	myCase.AccountNumber = ac.AccountNumber
+	myCase.CaseNumber = ac.CaseNumber
 	myCase.ContactName = ac.ContactName
-	myCase.Version = ac.Version
+	myCase.CreatedByName = ac.CreatedByName
+	myCase.CreatedDate = ac.CreatedDate
+	myCase.CustomerEscalation = ac.CustomerEscalation
+	myCase.Id = ac.Id
+	myCase.LastModifiedByName = ac.LastModifiedByName
+	myCase.LastModifiedDate = ac.LastModifiedDate
+	myCase.LastPublicUpdateDate = ac.LastPublicUpdateDate
+	myCase.LastPublicUpdateBy = ac.LastPublicUpdateBy
+	myCase.Number = ac.Number
+	myCase.Owner = ac.Owner
+	// Products
 	for _, p := range ac.Products {
 		prod := Product{}
 		if c.DB.Where(&Product{Name: p, CaseId: ac.Id}).First(&prod).RowsAffected == 0 {
@@ -90,6 +106,12 @@ func (c Cache) ConvertToDBCase(ac api.Case) Case {
 		}
 		myCase.Products = append(myCase.Products, prod)
 	}
+	myCase.Severity = ac.Severity
+	myCase.Summary = ac.Summary
+	myCase.Status = ac.Status
+	myCase.Type = ac.Type
+	myCase.Uri = ac.Uri
+	myCase.Version = ac.Version
 	return myCase
 }
 
@@ -143,4 +165,14 @@ func (c Cache) GetCasesActiveFrom(since time.Time) ([]Case, error) {
 		return []Case{}, err
 	}
 	return cases, nil
+}
+
+func (c Cache) GetUniqueCaseStatusValues() ([]string, error) {
+	results := make([]string, 0)
+	err := c.DB.Model(&Case{}).Distinct("status").Order("status asc").Find(&results).Error
+	if err != nil {
+		return []string{}, err
+	}
+	return results, nil
+
 }

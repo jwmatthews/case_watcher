@@ -69,26 +69,26 @@ func (cr CaseReport) ToCellValues() ([][]interface{}, [][]interface{}) {
 }
 
 type Case struct {
-	Id                   string    `json:"id"`
-	Uri                  string    `json:"uri"`
-	CaseNumber           string    `json:"caseNumber"`
-	CreatedByName        string    `json:"case_createdByName"`
-	ContactName          string    `json:"case_contactName"`
-	Version              string    `json:"case_version"`
-	Products             []string  `json:"case_product"`
-	Number               string    `json:"case_number"`
-	LastPublicUpdateBy   string    `json:"case_last_public_update_by"`
-	Severity             string    `json:"case_severity"`
-	Owner                string    `json:"case_owner"`
-	LastPublicUpdateDate time.Time `json:"case_last_public_update_date"`
-	CreatedDate          time.Time `json:"case_createdDate"`
-	Summary              string    `json:"case_summary"`
-	LastModifiedDate     time.Time `json:"case_lastModifiedDate"`
 	AccountNumber        string    `json:"case_accountNumber"`
-	Type                 string    `json:"case_type"`
-	LastModifiedByName   string    `json:"case_lastModifiedByName"`
+	CaseNumber           string    `json:"caseNumber"`
+	ContactName          string    `json:"case_contactName"`
+	CreatedByName        string    `json:"case_createdByName"`
+	CreatedDate          time.Time `json:"case_createdDate"`
 	CustomerEscalation   bool      `json:"case_customer_escalation"`
+	Id                   string    `json:"id"`
+	LastModifiedByName   string    `json:"case_lastModifiedByName"`
+	LastModifiedDate     time.Time `json:"case_lastModifiedDate"`
+	LastPublicUpdateBy   string    `json:"case_last_public_update_by"`
+	LastPublicUpdateDate time.Time `json:"case_last_public_update_date"`
+	Number               string    `json:"case_number"`
+	Owner                string    `json:"case_owner"`
+	Products             []string  `json:"case_product"`
+	Severity             string    `json:"case_severity"`
+	Summary              string    `json:"case_summary"`
 	Status               string    `json:"case_status"`
+	Type                 string    `json:"case_type"`
+	Uri                  string    `json:"uri"`
+	Version              string    `json:"case_version"`
 }
 
 func (c Case) String() string {
