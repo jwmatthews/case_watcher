@@ -70,7 +70,7 @@ func (cr CaseReport) ToCellValues() ([][]interface{}, [][]interface{}) {
 
 type Case struct {
 	AccountNumber        string    `json:"case_accountNumber"`
-	CaseNumber           string    `json:"caseNumber"`
+	CaseNumber           string    `json:"case_number"`
 	ContactName          string    `json:"case_contactName"`
 	CreatedByName        string    `json:"case_createdByName"`
 	CreatedDate          time.Time `json:"case_createdDate"`
@@ -80,7 +80,6 @@ type Case struct {
 	LastModifiedDate     time.Time `json:"case_lastModifiedDate"`
 	LastPublicUpdateBy   string    `json:"case_last_public_update_by"`
 	LastPublicUpdateDate time.Time `json:"case_last_public_update_date"`
-	Number               string    `json:"case_number"`
 	Owner                string    `json:"case_owner"`
 	Products             []string  `json:"case_product"`
 	Severity             string    `json:"case_severity"`

@@ -79,7 +79,7 @@ func (c Cache) ConvertToDBCases(cases []api.Case) []Case {
 
 // ConvertToDBCase converts from api format to DB
 // Ideally I would have 1 structure type and reuse for both
-// I *think* I need the 2 different formmats to handle some subtle
+// I *think* I need the 2 different formats to handle some subtle
 // differences with JSON vs Gorm modeling of Products, but I am not 100% certain
 // TODO: See if there is a cleaner way to refactor to a single reused structure definition between incoming API data and DB
 //
@@ -96,7 +96,6 @@ func (c Cache) ConvertToDBCase(ac api.Case) Case {
 	myCase.LastModifiedDate = ac.LastModifiedDate
 	myCase.LastPublicUpdateDate = ac.LastPublicUpdateDate
 	myCase.LastPublicUpdateBy = ac.LastPublicUpdateBy
-	myCase.Number = ac.Number
 	myCase.Owner = ac.Owner
 	// Products
 	for _, p := range ac.Products {

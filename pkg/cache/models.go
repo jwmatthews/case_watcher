@@ -23,7 +23,6 @@ type Case struct {
 	LastModifiedDate     time.Time
 	LastPublicUpdateBy   string
 	LastPublicUpdateDate time.Time
-	Number               string
 	Owner                string
 	Products             []Product
 	Severity             string
